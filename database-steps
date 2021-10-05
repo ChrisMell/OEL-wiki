@@ -1,0 +1,58 @@
+# Writing Step Definitions to Query the Database
+
+## Prerequisites
+1. Set up your db.properties file with the parameters for the database
+
+## Creating Java Classes
+
+1. Create a java class for storing queries as strings if your package doesn't have one already. Put the sql query in a public static string variable
+```public static String QUERY_STRING = "This is your sql query. Variables can be written as a question mark like this (column = ?);";```
+2. Create a java class for executing the query. Copy and paste the following code after the package name
+```
+import database.QueryOperation;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class ExampleExecuteClassName implements QueryOperation {
+    Connection connection;
+    public ExampleExecuteClassName(Connection connection) {
+        this.connection = connection;
+    }
+
+    @Override
+    public ResultSet execute() {
+        try {
+            PreparedStatement statement = this.connection.prepareStatement(ExampleQueries.QUERY_STRING);
+            return statement.executeQuery();
+        } catch (SQLException e) {
+            System.out.println("Error executing statement");
+        }
+        return null;
+    }
+}
+```
+
+## Building the Step Definition
+
+1. Write the step definition in the gherkin and create the java function in the appropriate class file. Add whatever parameters you need to the cucumber tag and the function signature 
+```
+@And({actor} gets active providers from the database with current year {word})
+Public getsActiveProviders(Actor actor, String year) {}
+```
+2. Create DBHelper object
+```DBHelper dbHelper = new DBHelper();```
+3. Add the execute query command method and store it in a ResultSet variable
+```ResultSet resultSet = dbHelper.executeQueryCommand(new ExampleExecuteClassName(dbHelper.getConnection()));```
+4. Paste the following code after getting the ResultSet to check if the data was retrieved
+```actor.wasAbleTo(Ensure.that(resultSet.next()).isTrue().orElseThrow(new DatabaseConnectionException("No records returned from the database")));```
+5. Use the ResultSet method getString to save the data required for the test case in global string variables. Pass the name of the column as a parameter to the method.
+```variableName = resultSet.getString("ColumnName");```
+6. OPTIONAL: log the variable to the console using this line
+```logger.info("COENumber: " + coeString);```
+Be sure to use this line at the tart of the class to create the logger global variable
+```private static final Logger logger = (Logger) LoggerFactory.getLogger(ExampleStepDefinitions.class);```
+7. Close the db connection at the end of the method
+```dbHelper.closeConnection();```
