@@ -52,7 +52,7 @@ Public getsActiveProviders(Actor actor, String year) {}
 ```variableName = resultSet.getString("ColumnName");```
 6. OPTIONAL: log the variable to the console using this line
 ```logger.info("COENumber: " + coeString);```
-Be sure to use this line at the tart of the class to create the logger global variable
+Be sure to use this line at the start of the class to create the logger global variable
 ```private static final Logger logger = (Logger) LoggerFactory.getLogger(ExampleStepDefinitions.class);```
 7. Close the db connection at the end of the method
 ```dbHelper.closeConnection();```
